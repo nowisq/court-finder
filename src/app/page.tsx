@@ -1,103 +1,164 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Plus, Map, List, X } from "lucide-react";
+import { CourtMap } from "@/components/map/CourtMap";
+import { CourtList } from "@/components/court/CourtList";
+import { CourtForm } from "@/components/court/CourtForm";
+import { useCourtStore } from "@/lib/store";
+import { apiClient } from "@/lib/api";
+import { Court } from "@/types";
+
+export default function HomePage() {
+  const [isListOpen, setIsListOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const { courts, setCourts, selectedCourt, setSelectedCourt } =
+    useCourtStore();
+
+  // 농구장 목록 조회
+  const { data: courtsData, isLoading } = useQuery({
+    queryKey: ["courts"],
+    queryFn: () => apiClient.getCourts(),
+  });
+
+  useEffect(() => {
+    if (courtsData) {
+      setCourts(courtsData);
+    }
+  }, [courtsData, setCourts]);
+
+  const handleCourtClick = (court: Court) => {
+    setSelectedCourt(court);
+    setIsListOpen(true);
+  };
+
+  // 지도 우클릭 시 등록 위치 설정
+  const handleRegisterLocation = (lat: number, lng: number) => {
+    setSelectedLocation({ lat, lng });
+    setIsFormOpen(true);
+  };
+
+  // 기존 지도 클릭 이벤트는 제거 (우클릭으로 대체)
+  const handleMapClick = (lat: number, lng: number) => {
+    // 지도 클릭 시 아무것도 하지 않음 (컨텍스트 메뉴 닫기만)
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setSelectedLocation(null);
+    // 농구장 목록 새로고침
+    window.location.reload();
+  };
+
+  const handleFormCancel = () => {
+    setIsFormOpen(false);
+    setSelectedLocation(null);
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="h-screen flex flex-col">
+      {/* 헤더 */}
+      <header className="bg-white border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900">농구장 찾기</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsListOpen(!isListOpen)}
+              className="flex items-center gap-2"
+            >
+              {isListOpen ? (
+                <Map className="w-4 h-4" />
+              ) : (
+                <List className="w-4 h-4" />
+              )}
+              {isListOpen ? "지도" : "목록"}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setIsFormOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              등록
+            </Button>
+          </div>
         </div>
+      </header>
+
+      {/* 메인 컨텐츠 */}
+      <main className="flex-1 relative">
+        {/* 지도 */}
+        <div
+          className={`h-full ${
+            isListOpen ? "w-2/3" : "w-full"
+          } transition-all duration-300`}
+        >
+          <CourtMap
+            courts={courts}
+            onCourtClick={handleCourtClick}
+            onMapClick={handleMapClick}
+            onRegisterLocation={handleRegisterLocation}
+          />
+        </div>
+
+        {/* 농구장 목록 사이드바 */}
+        {isListOpen && (
+          <div className="absolute right-0 top-0 w-1/3 h-full bg-white border-l border-gray-200 overflow-y-auto">
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">농구장 목록</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsListOpen(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+              </div>
+            ) : (
+              <CourtList courts={courts} onCourtClick={handleCourtClick} />
+            )}
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      {/* 농구장 등록 폼 */}
+      <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>새로운 농구장 등록</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto p-4">
+            {selectedLocation && (
+              <CourtForm
+                latitude={selectedLocation.lat}
+                longitude={selectedLocation.lng}
+                onSuccess={handleFormSuccess}
+                onCancel={handleFormCancel}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
