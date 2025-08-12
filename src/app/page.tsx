@@ -9,7 +9,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Plus, Map, List, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, ChevronRight, ChevronLeft, Search } from "lucide-react";
 import { CourtMap } from "@/components/map/CourtMap";
 import { CourtList } from "@/components/court/CourtList";
 import { CourtForm } from "@/components/court/CourtForm";
@@ -20,6 +21,7 @@ import { Court } from "@/types";
 export default function HomePage() {
   const [isListOpen, setIsListOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
@@ -38,6 +40,13 @@ export default function HomePage() {
       setCourts(courtsData);
     }
   }, [courtsData, setCourts]);
+
+  // 검색된 농구장 필터링
+  const filteredCourts = courts.filter(
+    (court) =>
+      court.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      court.address.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCourtClick = (court: Court) => {
     setSelectedCourt(court);
@@ -68,78 +77,82 @@ export default function HomePage() {
   };
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* 헤더 */}
-      <header className="bg-white border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">농구장 찾기</h1>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsListOpen(!isListOpen)}
-              className="flex items-center gap-2"
-            >
-              {isListOpen ? (
-                <Map className="w-4 h-4" />
-              ) : (
-                <List className="w-4 h-4" />
-              )}
-              {isListOpen ? "지도" : "목록"}
-            </Button>
+    <div className="h-screen flex">
+      {/* LNB 사이드바 (왼쪽) */}
+      <div
+        className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
+          isListOpen ? "translate-x-0" : "-translate-x-full"
+        } w-80 flex-shrink-0 absolute left-0 top-0 h-full z-10`}
+      >
+        {/* LNB 컨텐츠 */}
+        <div className="h-full flex flex-col">
+          {/* 검색 영역 (최상단) */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600" />
+              <Input
+                type="text"
+                placeholder="농구장 이름 또는 주소 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 border-amber-600 focus:border-amber-600 focus:ring-amber-600"
+              />
+            </div>
+          </div>
+
+          {/* 등록 버튼 */}
+          <div className="p-4 border-b border-gray-200">
             <Button
               size="sm"
               onClick={() => setIsFormOpen(true)}
-              className="flex items-center gap-2"
+              className="w-full flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
             >
               <Plus className="w-4 h-4" />
-              등록
+              농구장 등록
             </Button>
           </div>
-        </div>
-      </header>
 
-      {/* 메인 컨텐츠 */}
-      <main className="flex-1 relative">
-        {/* 지도 */}
-        <div
-          className={`h-full ${
-            isListOpen ? "w-2/3" : "w-full"
-          } transition-all duration-300`}
-        >
-          <CourtMap
-            courts={courts}
-            onCourtClick={handleCourtClick}
-            onMapClick={handleMapClick}
-            onRegisterLocation={handleRegisterLocation}
-          />
-        </div>
-
-        {/* 농구장 목록 사이드바 */}
-        {isListOpen && (
-          <div className="absolute right-0 top-0 w-1/3 h-full bg-white border-l border-gray-200 overflow-y-auto">
-            <div className="p-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">농구장 목록</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsListOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+          {/* 농구장 목록 */}
+          <div className="flex-1 overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               </div>
             ) : (
-              <CourtList courts={courts} onCourtClick={handleCourtClick} />
+              <CourtList
+                courts={filteredCourts}
+                onCourtClick={handleCourtClick}
+              />
             )}
           </div>
-        )}
-      </main>
+        </div>
+
+        {/* LNB 토글 버튼 (우측 바깥에 붙음) */}
+        <div className="absolute -right-6 top-1/2 transform -translate-y-1/2 z-20">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsListOpen(!isListOpen)}
+            className="p-2 h-12 w-6 rounded-r-lg rounded-l-none shadow-sm bg-white border-l-0 border-gray-200 hover:bg-gray-50 transition-all duration-200"
+          >
+            {isListOpen ? (
+              <ChevronLeft className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* 지도 영역 (전체 화면) */}
+      <div className="flex-1 relative">
+        <CourtMap
+          courts={courts}
+          onCourtClick={handleCourtClick}
+          onMapClick={handleMapClick}
+          onRegisterLocation={handleRegisterLocation}
+        />
+      </div>
 
       {/* 농구장 등록 폼 */}
       <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
