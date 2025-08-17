@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Plus, ChevronRight, ChevronLeft, Search } from "lucide-react";
 import { CourtMap } from "@/components/map/CourtMap";
 import { CourtList } from "@/components/court/CourtList";
+import { CourtDetail } from "@/components/court/CourtDetail";
 import { CourtForm } from "@/components/court/CourtForm";
 import { useCourtStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { Court } from "@/types";
 
 export default function HomePage() {
-  const [isListOpen, setIsListOpen] = useState(false);
+  const [isListOpen, setIsListOpen] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -86,38 +87,56 @@ export default function HomePage() {
       >
         {/* LNB 컨텐츠 */}
         <div className="h-full flex flex-col">
-          {/* 검색 영역 (최상단) */}
-          <div className="p-4 border-b border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600" />
-              <Input
-                type="text"
-                placeholder="농구장 이름 또는 주소 검색..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border-amber-600 focus:border-amber-600 focus:ring-amber-600"
-              />
-            </div>
-          </div>
+          {/* 검색 영역 (목록 화면일 때만 표시) */}
+          {!selectedCourt && (
+            <>
+              <div className="p-4 border-b border-gray-200">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-600" />
+                  <Input
+                    type="text"
+                    placeholder="농구장 이름 또는 주소 검색..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-2 border-amber-600 focus:border-amber-600 focus:ring-amber-600"
+                  />
+                </div>
+              </div>
 
-          {/* 등록 버튼 */}
-          <div className="p-4 border-b border-gray-200">
-            <Button
-              size="sm"
-              onClick={() => setIsFormOpen(true)}
-              className="w-full flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
-            >
-              <Plus className="w-4 h-4" />
-              농구장 등록
-            </Button>
-          </div>
+              {/* 등록 버튼 (목록 화면일 때만 표시) */}
+              <div className="p-4 border-b border-gray-200">
+                <Button
+                  size="sm"
+                  onClick={() => setIsFormOpen(true)}
+                  className="w-full flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+                >
+                  <Plus className="w-4 h-4" />
+                  농구장 등록
+                </Button>
+              </div>
+            </>
+          )}
 
-          {/* 농구장 목록 */}
+          {/* 농구장 목록 또는 상세 화면 */}
           <div className="flex-1 overflow-y-auto">
             {isLoading ? (
               <div className="flex items-center justify-center p-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
               </div>
+            ) : selectedCourt ? (
+              <>
+                {/* 뒤로가기 버튼 */}
+                <div className="p-4 border-b border-gray-200">
+                  <button
+                    onClick={() => setSelectedCourt(null)}
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    목록으로 돌아가기
+                  </button>
+                </div>
+                <CourtDetail court={selectedCourt} />
+              </>
             ) : (
               <CourtList
                 courts={filteredCourts}
