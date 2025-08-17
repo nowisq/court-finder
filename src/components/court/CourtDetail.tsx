@@ -33,6 +33,34 @@ const mockReviews = [
     text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
     visitDate: "2024. 1. 8",
   },
+  {
+    userName: "슈터킹",
+    userColor: "#8B5CF6",
+    rating: 5,
+    text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
+    visitDate: "2024. 1. 8",
+  },
+  {
+    userName: "슈터킹",
+    userColor: "#8B5CF6",
+    rating: 5,
+    text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
+    visitDate: "2024. 1. 8",
+  },
+  {
+    userName: "슈터킹",
+    userColor: "#8B5CF6",
+    rating: 5,
+    text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
+    visitDate: "2024. 1. 8",
+  },
+  {
+    userName: "슈터킹",
+    userColor: "#8B5CF6",
+    rating: 5,
+    text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
+    visitDate: "2024. 1. 8",
+  },
 ];
 
 const mockImages = [
@@ -79,6 +107,10 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
       </Badge>
     );
   };
+
+  const averageRating =
+    mockReviews.reduce((sum, review) => sum + review.rating, 0) /
+    mockReviews.length;
 
   return (
     <div className="p-4 space-y-4">
@@ -140,18 +172,23 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
           {/* 평균 별점 */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 text-yellow-500 fill-current" />
-              <Star className="w-5 h-5 text-yellow-500 fill-current" />
-              <Star className="w-5 h-5 text-yellow-500 fill-current" />
-              <Star className="w-5 h-5 text-yellow-500 fill-current" />
-              <Star className="w-5 h-5 text-yellow-500 fill-current" />
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Star
+                  key={index}
+                  className="w-5 h-5 text-yellow-500 fill-current"
+                />
+              ))}
             </div>
-            <span className="text-lg font-semibold text-gray-900">5.0</span>
-            <span className="text-sm text-gray-600">(리뷰 3개)</span>
+            <span className="text-lg font-semibold text-gray-900">
+              {averageRating.toFixed(1)}
+            </span>
+            <span className="text-sm text-gray-600">
+              (리뷰 {mockReviews.length}개)
+            </span>
           </div>
 
           {/* 리뷰 목록 */}
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-200 overflow-y-auto pr-2">
             {mockReviews.map((review, index) => (
               <ReviewItem
                 key={index}
