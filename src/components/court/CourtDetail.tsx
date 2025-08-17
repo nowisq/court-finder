@@ -3,6 +3,7 @@
 import { Court } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Carousel } from "@/components/ui/carousel";
+import { ReviewItem } from "@/components/court/ReviewItem";
 import { MapPin, Star, Clock, Globe, Share } from "lucide-react";
 import { match } from "ts-pattern";
 
@@ -10,11 +11,34 @@ interface CourtDetailProps {
   court: Court;
 }
 
-// Mock 이미지 3장
+const mockReviews = [
+  {
+    userName: "농구러버",
+    userColor: "#3B82F6",
+    rating: 5,
+    text: "정말 좋은 농구장입니다! 코트 상태가 깔끔하고 바스켓이 잘 맞습니다. 주차도 편리하고 조명도 밝아서 야간에도 농구하기 좋아요.가나다라마",
+    visitDate: "2024. 1. 15",
+  },
+  {
+    userName: "점프맨",
+    userColor: "#10B981",
+    rating: 4,
+    text: "코트가 넓고 바운드가 좋습니다. 실외라서 날씨에 따라 이용이 제한될 수 있지만, 맑은 날에는 정말 최고입니다.",
+    visitDate: "2024. 1. 10",
+  },
+  {
+    userName: "슈터킹",
+    userColor: "#8B5CF6",
+    rating: 5,
+    text: "이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다. 이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점 라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기 좋습니다.",
+    visitDate: "2024. 1. 8",
+  },
+];
+
 const mockImages = [
-  "https://picsum.photos/800/600?random=1",
-  "https://picsum.photos/800/600?random=2",
-  "https://picsum.photos/800/600?random=3",
+  "https://picsum.photos/400/300?random=1",
+  "https://picsum.photos/400/300?random=2",
+  "https://picsum.photos/400/300?random=3",
 ];
 
 export const CourtDetail = ({ court }: CourtDetailProps) => {
@@ -128,90 +152,16 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
 
           {/* 리뷰 목록 */}
           <div className="space-y-3">
-            {/* 리뷰 1 */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-blue-600">농</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  농구러버
-                </span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                </div>
-              </div>
-              <p className="text-sm text-gray-700 mb-2">
-                정말 좋은 농구장입니다! 코트 상태가 깔끔하고 바스켓이 잘
-                맞습니다. 주차도 편리하고 조명도 밝아서 야간에도 농구하기
-                좋아요.
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Clock className="w-3 h-3" />
-                <span>2024. 1. 15</span>
-              </div>
-            </div>
-
-            {/* 리뷰 2 */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-green-600">점</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  점프맨
-                </span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-gray-300" />
-                </div>
-              </div>
-              <p className="text-sm text-gray-700 mb-2">
-                코트가 넓고 바운드가 좋습니다. 실외라서 날씨에 따라 이용이
-                제한될 수 있지만, 맑은 날에는 정말 최고입니다.
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Clock className="w-3 h-3" />
-                <span>2024. 1. 10</span>
-              </div>
-            </div>
-
-            {/* 리뷰 3 */}
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-medium text-purple-600">
-                    슈
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">
-                  슈터킹
-                </span>
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                  <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                </div>
-              </div>
-              <p className="text-sm text-gray-700 mb-2">
-                이 농구장은 정말 추천합니다! 코트 상태가 훌륭하고, 특히 3점
-                라인과 프리드로우 라인이 정확하게 그려져 있어서 연습하기
-                좋습니다.
-              </p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Clock className="w-3 h-3" />
-                <span>2024. 1. 8</span>
-              </div>
-            </div>
+            {mockReviews.map((review, index) => (
+              <ReviewItem
+                key={index}
+                userName={review.userName}
+                userColor={review.userColor}
+                rating={review.rating}
+                text={review.text}
+                visitDate={review.visitDate}
+              />
+            ))}
           </div>
         </div>
       </div>
