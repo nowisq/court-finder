@@ -1,6 +1,8 @@
 {
   "framework": "nextjs",
   "regions": ["icn1"],
+  "installCommand": "corepack enable && corepack prepare pnpm@latest --activate && pnpm install",
+  "buildCommand": "pnpm build",
   "functions": {
     "app/**/*.tsx": {
       "maxDuration": 30
