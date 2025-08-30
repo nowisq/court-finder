@@ -42,6 +42,40 @@ export default function HomePage() {
     }
   }, [courtsData, setCourts]);
 
+  // URL 경로(/court/{id})와 선택 상태 동기화 (초기 진입 및 뒤로가기/앞으로가기)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const applyFromLocation = async () => {
+      const path = window.location.pathname;
+      const match = path.match(/^\/court\/(.+)$/);
+      if (match) {
+        const id = match[1];
+        let court = courts.find((c) => c.id === id) || null;
+        if (!court) {
+          try {
+            court = await apiClient.getCourt(id);
+          } catch {
+            // ignore fetch errors for fallback UX
+          }
+        }
+        if (court) {
+          setSelectedCourt(court);
+          setIsListOpen(true);
+        }
+        return;
+      }
+      setSelectedCourt(null);
+    };
+
+    applyFromLocation();
+    const onPopState = () => {
+      applyFromLocation();
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [courts, setSelectedCourt]);
+
   // 검색된 농구장 필터링
   const filteredCourts = courts.filter(
     (court) =>
@@ -50,8 +84,11 @@ export default function HomePage() {
   );
 
   const handleCourtClick = (court: Court) => {
-    setSelectedCourt(court);
+    if (typeof window !== "undefined") {
+      window.history.pushState({}, "", `/court/${court.id}`);
+    }
     setIsListOpen(true);
+    setSelectedCourt(court);
   };
 
   // 지도 우클릭 시 등록 위치 설정
@@ -128,7 +165,12 @@ export default function HomePage() {
                 {/* 뒤로가기 버튼 */}
                 <div className="p-4 border-b border-gray-200">
                   <button
-                    onClick={() => setSelectedCourt(null)}
+                    onClick={() => {
+                      setSelectedCourt(null);
+                      if (typeof window !== "undefined") {
+                        window.history.pushState({}, "", "/");
+                      }
+                    }}
                     className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
