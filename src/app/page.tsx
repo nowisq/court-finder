@@ -208,7 +208,7 @@ export default function HomePage() {
       {/* 지도 영역 (전체 화면) */}
       <div className="flex-1 relative">
         <CourtMap
-          courts={courts}
+          courts={filteredCourts}
           onCourtClick={handleCourtClick}
           onMapClick={handleMapClick}
           onRegisterLocation={handleRegisterLocation}

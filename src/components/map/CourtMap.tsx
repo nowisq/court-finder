@@ -121,8 +121,12 @@ export const CourtMap = ({
       map.removeSource("court-markers");
     }
 
-    // 마커 데이터 준비
-    const markerData = courts.map((court) => ({
+    // 마커 데이터 준비: 상세 진입 시 선택된 코트만 표시
+    const visibleCourts = selectedCourt
+      ? courts.filter((c) => c.id === selectedCourt.id)
+      : courts;
+
+    const markerData = visibleCourts.map((court) => ({
       type: "Feature",
       geometry: {
         type: "Point",
@@ -150,6 +154,8 @@ export const CourtMap = ({
       id: "court-markers",
       type: "circle",
       source: "court-markers",
+      // 선택된 코트가 있을 때 해당 id만 표시, 없으면 전체 표시(["all"])로 유효한 배열 유지
+      filter: selectedCourt ? ["==", ["get", "id"], selectedCourt.id] : ["all"],
       paint: {
         "circle-radius": ["case", ["==", ["get", "isSelected"], true], 8, 6],
         "circle-color": [
