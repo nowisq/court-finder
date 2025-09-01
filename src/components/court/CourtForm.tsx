@@ -25,6 +25,7 @@ type CourtFormValues = z.infer<typeof courtFormSchema>;
 interface CourtFormProps {
   latitude: number;
   longitude: number;
+  initialAddress?: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -32,11 +33,12 @@ interface CourtFormProps {
 export const CourtForm = ({
   latitude,
   longitude,
+  initialAddress,
   onSuccess,
   onCancel,
 }: CourtFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [address, setAddress] = useState<string>("");
+  const [address, setAddress] = useState<string>(initialAddress ?? "");
   const [imageUrl, setImageUrl] = useState<string>("");
 
   const {
@@ -131,7 +133,14 @@ export const CourtForm = ({
                 placeholder="주소를 입력하거나 좌표에서 가져오세요"
                 className={errors.address ? "border-red-500" : ""}
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setAddress(v);
+                  setValue("address", v, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                  });
+                }}
               />
               <Button
                 type="button"

@@ -2,19 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+// import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, ChevronRight, ChevronLeft, Search } from "lucide-react";
 import { CourtMap } from "@/components/map/CourtMap";
 import { CourtList } from "@/components/court/CourtList";
 import { CourtDetail } from "@/components/court/CourtDetail";
-import { CourtForm } from "@/components/court/CourtForm";
+// import { CourtForm } from "@/components/court/CourtForm";
+import { RegisterCourtDialog } from "@/components/court/RegisterCourtDialog";
 import { useCourtStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { Court } from "@/types";
@@ -22,6 +18,10 @@ import { Court } from "@/types";
 export default function HomePage() {
   const [isListOpen, setIsListOpen] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [pickMode, setPickMode] = useState(false);
+  const [reverseGeocodedAddress, setReverseGeocodedAddress] = useState<
+    string | null
+  >(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
@@ -97,10 +97,29 @@ export default function HomePage() {
     setIsFormOpen(true);
   };
 
-  // 기존 지도 클릭 이벤트는 제거 (우클릭으로 대체)
-  const handleMapClick = (lat: number, lng: number) => {
-    // 지도 클릭 시 아무것도 하지 않음 (컨텍스트 메뉴 닫기만)
+  const startPickMode = () => {
+    setReverseGeocodedAddress(null);
+    setSelectedLocation(null);
+    setPickMode(true);
   };
+
+  const handlePick = async (lat: number, lng: number) => {
+    try {
+      setPickMode(false);
+      setSelectedLocation({ lat, lng });
+      const address = await apiClient.getAddress(lat, lng);
+      setReverseGeocodedAddress(address);
+      setIsFormOpen(true);
+    } catch (e) {
+      console.error(e);
+      setIsFormOpen(true);
+    } finally {
+      setPickMode(false);
+    }
+  };
+
+  // 기존 지도 클릭 이벤트는 제거 (우클릭으로 대체)
+  // const handleMapClick = (lat: number, lng: number) => {};
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
@@ -144,7 +163,7 @@ export default function HomePage() {
               <div className="p-4 border-b border-gray-200">
                 <Button
                   size="sm"
-                  onClick={() => setIsFormOpen(true)}
+                  onClick={startPickMode}
                   className="w-full flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white"
                 >
                   <Plus className="w-4 h-4" />
@@ -210,29 +229,22 @@ export default function HomePage() {
         <CourtMap
           courts={filteredCourts}
           onCourtClick={handleCourtClick}
-          onMapClick={handleMapClick}
           onRegisterLocation={handleRegisterLocation}
+          pickMode={pickMode}
+          onPick={handlePick}
         />
       </div>
 
-      {/* 농구장 등록 폼 */}
-      <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>새로운 농구장 등록</SheetTitle>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-4">
-            {selectedLocation && (
-              <CourtForm
-                latitude={selectedLocation.lat}
-                longitude={selectedLocation.lng}
-                onSuccess={handleFormSuccess}
-                onCancel={handleFormCancel}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      {/* 농구장 등록 다이얼로그 */}
+      <RegisterCourtDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        latitude={selectedLocation?.lat ?? null}
+        longitude={selectedLocation?.lng ?? null}
+        initialAddress={reverseGeocodedAddress}
+        onSuccess={handleFormSuccess}
+        onCancel={handleFormCancel}
+      />
     </div>
   );
 }
