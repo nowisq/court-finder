@@ -4,8 +4,18 @@ import { Court } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Carousel } from "@/components/ui/carousel";
 import { ReviewItem } from "@/components/court/ReviewItem";
-import { MapPin, Star, Clock, Globe, Share } from "lucide-react";
+import {
+  MapPin,
+  Star,
+  Clock,
+  Globe,
+  Share,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { match } from "ts-pattern";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface CourtDetailProps {
   court: Court;
@@ -69,7 +79,11 @@ const mockImages = [
   "https://picsum.photos/400/300?random=3",
 ];
 
+const REVIEWS_PER_PAGE = 5;
+
 export const CourtDetail = ({ court }: CourtDetailProps) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
   const getStatusBadge = (status: Court["status"]) => {
     return match(status)
       .with("approved", () => (
@@ -107,6 +121,13 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
       </Badge>
     );
   };
+
+  const totalPages = Math.ceil(mockReviews.length / REVIEWS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
+  const paginatedReviews = mockReviews.slice(
+    startIndex,
+    startIndex + REVIEWS_PER_PAGE
+  );
 
   const averageRating =
     mockReviews.reduce((sum, review) => sum + review.rating, 0) /
@@ -188,8 +209,8 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
           </div>
 
           {/* 리뷰 목록 */}
-          <div className="space-y-3 max-h-200 overflow-y-auto pr-2">
-            {mockReviews.map((review, index) => (
+          <div className="space-y-3 pr-2">
+            {paginatedReviews.map((review, index) => (
               <ReviewItem
                 key={index}
                 userName={review.userName}
@@ -199,6 +220,44 @@ export const CourtDetail = ({ court }: CourtDetailProps) => {
                 visitDate={review.visitDate}
               />
             ))}
+          </div>
+
+          {/* 페이지네이션 */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              aria-label="이전 페이지"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            {Array.from({ length: totalPages }).map((_, i) => {
+              const page = i + 1;
+              const isActive = page === currentPage;
+              return (
+                <Button
+                  key={page}
+                  variant={isActive ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={`${page}페이지`}
+                >
+                  {page}
+                </Button>
+              );
+            })}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="다음 페이지"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>

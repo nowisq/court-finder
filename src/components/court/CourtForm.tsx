@@ -7,7 +7,13 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Upload, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
@@ -104,15 +110,34 @@ export const CourtForm = ({
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto shadow-none hover:shadow-none active:shadow-none border border-gray-200">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="w-5 h-5" />
-          새로운 농구장 등록
+          장소 추가
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div className="flex items-center justify-between rounded-md border bg-gray-50 px-3 py-2 text-xs text-gray-600">
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="secondary"
+              className="border-gray-200 bg-gray-100 text-gray-600"
+            >
+              좌표
+            </Badge>
+            <span className="font-mono">
+              {latitude.toFixed(5)}, {longitude.toFixed(5)}
+            </span>
+          </div>
+          <span className="text-[10px] text-gray-400">지도에서 선택됨</span>
+        </div>
+
+        <form
+          id="court-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 mt-3"
+        >
           <div>
             <label className="block text-sm font-medium mb-2">장소명</label>
             <Input
@@ -206,29 +231,27 @@ export const CourtForm = ({
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={isIndoor === false ? "default" : "outline"}
+                variant="outline"
                 onClick={() => setValue("isIndoor", false)}
-                className="flex-1"
+                className={`flex-1 border-amber-600 ${
+                  isIndoor === false
+                    ? "bg-amber-600 hover:bg-amber-700 text-white"
+                    : "text-amber-700 hover:bg-amber-50"
+                }`}
               >
-                <Badge
-                  variant="outline"
-                  className="text-green-600 border-green-600"
-                >
-                  실외
-                </Badge>
+                실외
               </Button>
               <Button
                 type="button"
-                variant={isIndoor === true ? "default" : "outline"}
+                variant="outline"
                 onClick={() => setValue("isIndoor", true)}
-                className="flex-1"
+                className={`flex-1 border-amber-600 ${
+                  isIndoor === true
+                    ? "bg-amber-600 hover:bg-amber-700 text-white"
+                    : "text-amber-700 hover:bg-amber-50"
+                }`}
               >
-                <Badge
-                  variant="outline"
-                  className="text-blue-600 border-blue-600"
-                >
-                  실내
-                </Badge>
+                실내
               </Button>
             </div>
           </div>
